@@ -30,14 +30,11 @@ os.environ["YAW_DEG"] = str(10)        # degrees
 
 
 if __name__ == '__main__':
-    # Initialization
     cf = Crazyflie(rw_cache="cache")
     abort = False
     land = False
     velocity_x = 0.0
     velocity_y = 0.0
-
-    # Main loop
     with SyncCrazyflie(connect(), cf=cf) as scf:
         with MotionCommander(scf, default_height=1) as mc:
             while not abort and not land:

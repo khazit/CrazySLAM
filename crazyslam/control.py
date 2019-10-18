@@ -37,9 +37,9 @@ def key_controller(mc, current_velocity_x, current_velocity_y):
 
     Each command increments the speed in the proper axis/direction by VELOCITY
     and then starts a linear motion with the updated velocity values on both
-    the x and y axis.
+    x and y axis.
     Yaw commands however are blocking: at each press, the Crazyflie yaw for
-    YAW_DEG degrees and doesn't return until the yaw is completed.
+    YAW_DEG degrees.
 
     Args:
         mc: MotionCommander object
