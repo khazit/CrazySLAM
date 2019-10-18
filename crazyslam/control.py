@@ -2,7 +2,7 @@ import os
 import time
 from pynput import keyboard
 
-from utils import connect
+from utils import get_address
 
 import cflib.crtp
 from cflib.crazyflie import Crazyflie
@@ -106,7 +106,7 @@ if __name__ == '__main__':
     land = False
     velocity_x = 0.0
     velocity_y = 0.0
-    with SyncCrazyflie(connect(), cf=cf) as scf:
+    with SyncCrazyflie(get_address(), cf=cf) as scf:
         with MotionCommander(scf, default_height=0.1) as mc:
             while not abort and not land:
                 if get_key_capture() is not None:
