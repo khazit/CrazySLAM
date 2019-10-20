@@ -1,5 +1,6 @@
 # P
 cache
+data
 *.ipynb
 *.mat
 
