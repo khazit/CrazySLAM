@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[310]:
+# In[ ]:
 
 
 import numpy as np
@@ -17,14 +17,14 @@ from skimage.draw import line as bresenham
 # ## Data
 # ---
 
-# In[311]:
+# In[ ]:
 
 
-data = loadmat("practice.mat")
+data = loadmat("mapping_data.mat")
 data
 
 
-# In[312]:
+# In[ ]:
 
 
 states = np.array(data["pose"])
@@ -32,12 +32,12 @@ ranges = np.array(data["ranges"])
 angles = np.array(data["scanAngles"])
 timestamp = np.array(data["t"])
 
-selected_idx= np.linspace(0, len(angles), 200, dtype="uint8")
+selected_idx= np.linspace(0, len(angles)-1, 4, dtype="int32")
 angles = angles[selected_idx, :]
 ranges = ranges[selected_idx, :]
 
 
-# In[313]:
+# In[ ]:
 
 
 ranges.shape
@@ -47,7 +47,7 @@ ranges.shape
 # ---
 # ### State
 
-# In[314]:
+# In[ ]:
 
 
 plt.figure(figsize=(14, 6))
@@ -68,7 +68,7 @@ plt.show()
 
 # #### Sensor bearing
 
-# In[315]:
+# In[ ]:
 
 
 plt.figure()
@@ -81,31 +81,30 @@ plt.show()
 # ## Algorithm
 # ---
 
-# In[316]:
+# In[ ]:
 
 
-from math import floor, cos, sin, degrees, copysign
+from math import floor, cos, sin, degrees, copysign, pi
 
 
-# In[317]:
+# In[ ]:
 
 
 params = {
     "resolution": 10,  # number of cells to subdivide 1 meter
-    "size": 30,        # size of the square map in meters
-    "origin": (0, 0),  # (x, y)
-    "min": (           # helps discretize position states
-        states[0, :].min(), 
-        states[1, :].min(),
-    )
+    "size": 70,        # size of the square map in meters
+    "origin": None,  
 }
-
+params["origin"] = (
+    params["resolution"]*params["size"]//2,
+    params["resolution"]*params["size"]//2,
+)
 params
 
 
 # ### Utility functions
 
-# In[318]:
+# In[ ]:
 
 
 def create_empty_map(params):
@@ -123,7 +122,7 @@ def create_empty_map(params):
     return np.zeros((params["size"]*params["resolution"], params["size"]*params["resolution"]))
 
 
-# In[319]:
+# In[ ]:
 
 
 def discretize(position, params):
@@ -141,14 +140,22 @@ def discretize(position, params):
         
     """
     return (
-        floor((position[0]-params["min"][0]) * params["resolution"]), 
-        floor((position[1]-params["min"][1]) * params["resolution"]),
+        floor((position[0]) * params["resolution"]) + params["origin"][0], 
+        floor((position[1]) * params["resolution"]) + params["origin"][1],
     )
+
+discretize((0, 0), params)
 
 
 # ### FInd observed cell
 
-# In[320]:
+# In[ ]:
+
+
+
+
+
+# In[ ]:
 
 
 def target_cell(state, sensor_range, sensor_bearing):
@@ -165,45 +172,51 @@ def target_cell(state, sensor_range, sensor_bearing):
         Tuple of (x, y) GLOBAL coordinates
     """
     return (
-        (sensor_range * cos(state[2]+sensor_bearing)) + state[0],
-        (sensor_range * sin(state[2]+sensor_bearing)) + state[1],
+        ( sensor_range * cos(state[2]+sensor_bearing)) + state[0],
+        (-sensor_range * sin(state[2]+sensor_bearing)) + state[1],
     )
 
 
-# In[321]:
+# In[ ]:
 
 
 params_tmp = {
-    "resolution": 20,  # number of cells to subdivide 1 meter
-    "size": 30,        # size of the square map in meters
-    "origin": (0, 0),  # (x, y)
-    "min": (           # helps discretize position states
-        0, 
-        0,
-    )
+    "resolution": 5,  # number of cells to subdivide 1 meter
+    "size": 10,        # size of the square map in meters
 }
+params_tmp["origin"] = (
+    params_tmp["resolution"]*params_tmp["size"]//2,
+    params_tmp["resolution"]*params_tmp["size"]//2,
+)
 
-
+print(params_tmp)
 tmp_map = create_empty_map(params_tmp)
 
-state = [10, 10, -4.59]
-sensor_range = 10
-sensor_bearing = -1
-
+state = [0, 0, 0]
 position = discretize(state[:2], params_tmp)
-target = discretize(target_cell(state, sensor_range, sensor_bearing), params_tmp)
 
 plt.figure(figsize=(8, 7))
 plt.imshow(tmp_map)
 plt.plot(position[1], position[0], 'wo', markersize=15, label="vehicule")
-plt.plot(target[1], target[0], 'yo', markersize=15, label="target")
+
+first_target = discretize(target_cell(state, ranges[1, 0], angles[0]), params_tmp)
+plt.plot(first_target[1], first_target[0], 'co', markersize=10, label="first")
+
+last_target = discretize(target_cell(state, ranges[1, -1], angles[-1]), params_tmp)
+plt.plot(last_target[1], last_target[0], 'ro', markersize=10, label="last")
+
+
+for i in range(len(angles)):
+    target = discretize(target_cell(state, ranges[0, i], angles[i]), params_tmp)
+    plt.plot(target[1], target[0], 'yo', markersize=1)
+
 plt.legend()
 plt.show()
 
 
 # ### Bresenham's line algorithm
 
-# In[322]:
+# In[ ]:
 
 
 def bresenham_line(start, end):
@@ -222,13 +235,13 @@ def bresenham_line(start, end):
     return list(zip(tmp[0], tmp[1]))[1:-1] # start and end points are removed
 
 
-# In[323]:
+# In[ ]:
 
 
 get_ipython().run_cell_magic('time', '', '\ngrid_bresenham = np.zeros((40, 80))\nstart = (5, 10)\nend = (34, 75)\n\nline = bresenham_line(start, end)')
 
 
-# In[324]:
+# In[ ]:
 
 
 grid_bresenham[start[0], start[1]] = 3
@@ -244,7 +257,7 @@ plt.show()
 
 # ### Path visualization
 
-# In[325]:
+# In[ ]:
 
 
 def occupancy_grid_map_path(ranges, angles, states, params):
@@ -255,16 +268,16 @@ def occupancy_grid_map_path(ranges, angles, states, params):
     return occupancy_grid
 
 
-# In[326]:
+# In[ ]:
 
 
 grid_map = occupancy_grid_map_path(ranges, angles, states, params)
 
 
-# In[327]:
+# In[ ]:
 
 
-plt.figure(figsize=(16, 14))
+plt.figure(figsize=(20, 18))
 plt.imshow(grid_map)
 
 start = discretize(states[:2, 0], params)
@@ -301,14 +314,14 @@ plt.show()
 # ### Main function
 # ---
 
-# In[341]:
+# In[ ]:
 
 
 def occupancy_grid_map(ranges, angles, states, params):
-    LOG_ODD_MAX  = 25
-    LOG_ODD_MIN  = -5
-    LOG_ODD_OCCU = 0.9
-    LOG_ODD_FREE = 0.7
+    LOG_ODD_MAX  = 100
+    LOG_ODD_MIN  = -30
+    LOG_ODD_OCCU = 1
+    LOG_ODD_FREE = 0.3
     occupancy_grid = create_empty_map(params)
     
     # for each timestamp
@@ -329,23 +342,17 @@ def occupancy_grid_map(ranges, angles, states, params):
     return np.clip(occupancy_grid, a_max=LOG_ODD_MAX, a_min=LOG_ODD_MIN)
 
 
-# In[342]:
+# In[ ]:
 
 
 grid_map = occupancy_grid_map(ranges, angles, states, params)
 
 
-# In[344]:
-
-
-plt.figure(figsize=(20, 15))
-plt.imshow(grid_map, cmap="gray")
-plt.colorbar()
-plt.show()
-
-
 # In[ ]:
 
 
-
+plt.figure(figsize=(40, 30))
+plt.imshow(grid_map, cmap="gray_r")
+plt.colorbar()
+plt.show()
 
