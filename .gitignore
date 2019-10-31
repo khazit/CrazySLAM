@@ -1,7 +1,7 @@
 # P
 cache
 data
-*.ipynb
+notebooks/**
 *.mat
 
 # Byte-compiled / optimized / DLL files
