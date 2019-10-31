@@ -1,6 +1,7 @@
 """Mapping module
 
-This module ...
+This module implements an algorithm that create and update an occupancy grid
+map using ultrasound sensors range inputs.
 """
 
 
@@ -61,17 +62,19 @@ def discretize(position, params):
 
 
     Args:
-        position: Tuple of (x, y) GLOBAL coordinates
+        position: Vector ((x, y), n) or tuple (x, y)  of GLOBAL coordinates
         params: Dict of parameters
 
     Returns:
-        Tuple of (x, y) GLOBAL index coordinates
+        2D vector ((x, y), n) of GLOBAL index coordinates
 
     """
-    return (
-        floor((position[0]) * params["resolution"]) + params["origin"][0],
-        floor((position[1]) * params["resolution"]) + params["origin"][1],
-    )
+    assert position.shape[0] == 2, \
+        "Error: Position vector shape should be (2, n)"
+    return np.vstack((
+        np.floor((position[0]) * params["resolution"]) + params["origin"][0],
+        np.floor((position[1]) * params["resolution"]) + params["origin"][1],
+    )).astype(np.int16)
 
 
 def target_cell(state, sensor_range, sensor_bearing):
@@ -81,16 +84,35 @@ def target_cell(state, sensor_range, sensor_bearing):
 
     Args:
         state: (x, y, alpha) state of the vehicule in the GLOBAL frame
-        sensor_range: Observed range
-        sensor_bearing: Sensor heading
+        sensor_range: Observed ranges
+        sensor_bearing: Sensor headings
 
     Returns:
-        Tuple of (x, y) GLOBAL coordinates
+        2D vector ((x, y), n) of GLOBAL coordinates
     """
-    return (
-        (sensor_range * cos(state[2]+sensor_bearing)) + state[0],
-        (-sensor_range * sin(state[2]+sensor_bearing)) + state[1],
-    )
+    # If is sensor input is a vector, then use vectorization
+    if isinstance(sensor_range, np.ndarray):
+        sensor_range = sensor_range.reshape((-1, 1))
+        sensor_bearing = sensor_bearing.reshape((-1, 1))
+        res = np.concatenate((
+            (sensor_range * np.cos(state[2]+sensor_bearing)) + state[0],
+            (-sensor_range * np.sin(state[2]+sensor_bearing)) + state[1],
+        ), axis=1).T
+    else:
+        assert type(sensor_range) == type(sensor_bearing),\
+            "Range inputs and scan angles not the same type. {}-{}".format(
+                type(sensor_range),
+                type(sensor_bearing)
+            )
+        res = np.array([
+            (sensor_range * np.cos(state[2]+sensor_bearing)) + state[0],
+            (-sensor_range * np.sin(state[2]+sensor_bearing)) + state[1],
+        ])
+    assert res.shape[0] == 2, \
+        "Error: Incorrect shape returned. Should be (2, n), is {}".format(
+            res.shape
+        )
+    return res
 
 
 def bresenham_line(start, end):
@@ -100,13 +122,16 @@ def bresenham_line(start, end):
 
     Args:
         start: (x, y) GLOBAL index coordinates of the starting point
-        end: (x, y) GLOBAL index coordinates of the ending point
+        end: ((x, y), n) GLOBAL index coordinates of the ending points
 
     Returns:
-        List of (x, y) index coordinates that form the straight line
+        List of (x, y) index coordinates that form the straight lines
     """
-    tmp = bresenham(start[0], start[1], end[0], end[1])
-    return list(zip(tmp[0], tmp[1]))[1:-1]  # start and end points are removed
+    path = list()
+    for target in end.T:
+        tmp = bresenham(start[0], start[1], target[0], target[1])
+        path += (list(zip(tmp[0], tmp[1]))[1:-1])  # start + end points removed
+    return path
 
 
 def update_grid_map(grid, ranges, angles, state, params):
@@ -126,19 +151,20 @@ def update_grid_map(grid, ranges, angles, state, params):
     LOG_ODD_MIN = -30
     LOG_ODD_OCCU = 1
     LOG_ODD_FREE = 0.3
-    for idx, d in enumerate(ranges):
-        # compute the vehicule position
-        position = discretize(state[:2], params)
-        # compute the target position
-        target = target_cell(state, d, angles[idx])
-        target = discretize(target, params)
-        # find the affected cells
-        path = bresenham_line(position, target)
-        # update log odds
-        grid[position] += LOG_ODD_FREE
-        for cell in path:
-            grid[cell] += LOG_ODD_FREE
-        grid[target] -= LOG_ODD_OCCU
+
+    # compute the measured position
+    targets = target_cell(state, ranges, angles)
+    targets = discretize(targets, params)
+
+    # find the affected cells
+    position = discretize(state[:2], params)
+    cells = bresenham_line(position.reshape(2), targets)
+
+    # update log odds
+    grid[position[0, :], position[1, :]] += LOG_ODD_FREE
+    grid[tuple(np.array(cells).T)] += LOG_ODD_FREE
+    grid[targets[0, :], targets[1, :]] -= LOG_ODD_OCCU
+
     return np.clip(grid, a_max=LOG_ODD_MAX, a_min=LOG_ODD_MIN)
 
 
@@ -152,7 +178,7 @@ if __name__ == '__main__':
     angles = np.array(data["scanAngles"])
     timestamp = np.array(data["t"])
 
-    selected_idx = np.linspace(0, len(angles)-1, 100, dtype="int32")
+    selected_idx = np.linspace(0, len(angles)-1, 4, dtype="int32")
     angles = angles[selected_idx, :]
     ranges = ranges[selected_idx, :]
 
