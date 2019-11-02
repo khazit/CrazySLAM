@@ -10,28 +10,30 @@ from math import floor, cos, sin
 from skimage.draw import line as bresenham
 
 
-def init_params_dict(size, resolution):
+def init_params_dict(size, resolution, origin=None):
     """Initialize the parameters dictionary given a map size and resolution
 
     Args:
         size: Size of the square map in meters
         resolution: Number of cells to subdivide 1 meter into
+        origin: Initial
 
     Returns:
         Parameters dictionary:
             "resolution": Resolution
             "size": Size
-            "origin": Starting coordinates of the Crazyflie (middle of the map)
+            "origin": Initial index coordinates (middle of the map if not def)
     """
     params = {
         "resolution": resolution,
         "size": size,
-        "origin": None,
+        "origin": origin,
     }
-    params["origin"] = (
-        params["resolution"]*params["size"]//2,
-        params["resolution"]*params["size"]//2,
-    )
+    if params["origin"] is None:  # if origin is not set
+        params["origin"] = (
+            params["resolution"]*params["size"]//2,
+            params["resolution"]*params["size"]//2,
+        )
     return params
 
 
@@ -66,7 +68,7 @@ def discretize(position, params):
         params: Dict of parameters
 
     Returns:
-        2D vector ((x, y), n) of GLOBAL index coordinates
+        2D vector ((x, y), n) of INDEX coordinates
 
     """
     assert position.shape[0] == 2, \
@@ -121,11 +123,11 @@ def bresenham_line(start, end):
     Use scikit-image implementation of the Bresenham line algorithm
 
     Args:
-        start: (x, y) GLOBAL index coordinates of the starting point
-        end: ((x, y), n) GLOBAL index coordinates of the ending points
+        start: (x, y) INDEX coordinates of the starting point
+        end: ((x, y), n) INDEX coordinates of the ending points
 
     Returns:
-        List of (x, y) index coordinates that form the straight lines
+        List of (x, y) INDEX coordinates that form the straight lines
     """
     path = list()
     for target in end.T:
@@ -178,7 +180,7 @@ if __name__ == '__main__':
     angles = np.array(data["scanAngles"])
     timestamp = np.array(data["t"])
 
-    selected_idx = np.linspace(0, len(angles)-1, 4, dtype="int32")
+    selected_idx = np.linspace(0, len(angles)-1, 100, dtype="int32")
     angles = angles[selected_idx, :]
     ranges = ranges[selected_idx, :]
 
