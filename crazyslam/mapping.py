@@ -73,10 +73,11 @@ def discretize(position, params):
     """
     assert position.shape[0] == 2, \
         "Error: Position vector shape should be (2, n)"
-    return np.vstack((
+    idx = np.vstack((
         np.floor((position[0]) * params["resolution"]) + params["origin"][0],
         np.floor((position[1]) * params["resolution"]) + params["origin"][1],
     )).astype(np.int16)
+    return np.clip(idx, a_max=params["resolution"]*params["size"], a_min=0)
 
 
 def target_cell(state, sensor_range, sensor_bearing):
