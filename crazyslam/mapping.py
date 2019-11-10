@@ -151,7 +151,7 @@ def update_grid_map(grid, ranges, angles, state, params):
         Updated occupancy grid map
     """
     LOG_ODD_MAX = 100
-    LOG_ODD_MIN = -30
+    LOG_ODD_MIN = -50
     LOG_ODD_OCCU = 1
     LOG_ODD_FREE = 0.3
 
@@ -164,40 +164,8 @@ def update_grid_map(grid, ranges, angles, state, params):
     cells = bresenham_line(position.reshape(2), targets)
 
     # update log odds
-    grid[position[0, :], position[1, :]] += LOG_ODD_FREE
-    grid[tuple(np.array(cells).T)] += LOG_ODD_FREE
-    grid[targets[0, :], targets[1, :]] -= LOG_ODD_OCCU
+    grid[position[0, :], position[1, :]] -= LOG_ODD_FREE
+    grid[tuple(np.array(cells).T)] -= LOG_ODD_FREE
+    grid[targets[0, :], targets[1, :]] += LOG_ODD_OCCU
 
     return np.clip(grid, a_max=LOG_ODD_MAX, a_min=LOG_ODD_MIN)
-
-
-if __name__ == '__main__':
-    from scipy.io import loadmat
-    import matplotlib.pyplot as plt
-
-    data = loadmat("crazyslam/data/mapping_data.mat")
-    states = np.array(data["pose"])
-    ranges = np.array(data["ranges"])
-    angles = np.array(data["scanAngles"])
-    timestamp = np.array(data["t"])
-
-    selected_idx = np.linspace(0, len(angles)-1, 100, dtype="int32")
-    angles = angles[selected_idx, :]
-    ranges = ranges[selected_idx, :]
-
-    params = init_params_dict(70, 10)
-    occupancy_grid = create_empty_map(params)
-
-    # for each timestamp
-    for i in range(states.shape[1]):
-        occupancy_grid = update_grid_map(
-            occupancy_grid,
-            ranges[:, i],
-            angles,
-            states[:, i],
-            params
-        )
-
-    plt.figure()
-    plt.imshow(occupancy_grid, cmap="gray_r")
-    plt.show()
