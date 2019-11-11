@@ -1,4 +1,4 @@
-from crazyslam.logger import *
+from crazyslam.logging import *
 
 
 if __name__ == '__main__':
