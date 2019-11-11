@@ -1,4 +1,7 @@
+import sys
+sys.path.append("")
 from crazyslam.mapping import *
+
 
 if __name__ == '__main__':
     from scipy.io import loadmat
