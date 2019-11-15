@@ -1,9 +1,10 @@
+import sys
 from crazyslam.logging import *
 
 
 if __name__ == '__main__':
     from cflib.crazyflie import Crazyflie
-    from utils import get_address
+    from crazyslam.utils import get_address
     import time
     i = 0
     cf = Crazyflie(rw_cache="cache")

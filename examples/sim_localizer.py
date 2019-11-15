@@ -1,5 +1,3 @@
-import sys
-sys.path.append("")
 from crazyslam.localization import *
 from crazyslam.mapping import *
 from tqdm import tqdm

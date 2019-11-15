@@ -2,7 +2,7 @@ import os
 import time
 from pynput import keyboard
 
-from utils import get_address
+from crazyslam.utils import get_address
 
 import cflib.crtp
 from cflib.crazyflie import Crazyflie
