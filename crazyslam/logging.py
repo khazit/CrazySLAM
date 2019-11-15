@@ -1,5 +1,11 @@
-import os
+"""Logging module
 
+This module logs variables that are coming from the Crazyflie (range data and a
+state estimate (x, y and yaw)) that are needed for the slam algorithm. Also
+writes all the logged data to disk for post flight analysis
+"""
+
+import os
 from cflib.crazyflie.log import LogConfig
 from cflib.crazyflie.syncCrazyflie import SyncCrazyflie
 
@@ -22,7 +28,10 @@ def init_log_conf(scf, callback):
     log_conf.add_variable('range.back', 'uint16_t')
     log_conf.add_variable('range.left', 'uint16_t')
     log_conf.add_variable('range.right', 'uint16_t')
-    # TODO: add state estimate : (x, y, yaw)
+    # State estimate (x, y, yaw)
+    log_conf.add_variable('stateEstimate.x', 'float')
+    log_conf.add_variable('stateEstimate.y', 'float')
+    log_conf.add_variable('controller.yaw', 'float')
 
     scf.cf.log.add_config(log_conf)
     log_conf.data_received_cb.add_callback(callback)
@@ -31,6 +40,7 @@ def init_log_conf(scf, callback):
 
 def write_to_disk(dir, timestamp, data):
     """Log data to disk"""
+    # TODO: create dir/file if they don't exist. File with header
     assert os.path.isdir(dir), "No data directory found"
     filename = "data"
     data_point = str(timestamp)
@@ -40,10 +50,3 @@ def write_to_disk(dir, timestamp, data):
     f = open(os.path.join(dir, filename), "a")
     f.write(data_point)
     f.close()
-
-
-def logging_callback(timestamp, data, logconf):
-    """Receive the data at each timestamp"""
-    # NOTE: maybe define it in main.py
-    print("New data received")
-    write_to_disk("data", timestamp, data)
