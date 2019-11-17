@@ -3,6 +3,7 @@ cache
 data
 notebooks/**
 *.mat
+log
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
