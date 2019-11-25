@@ -1,18 +1,33 @@
+import argparse
+from tqdm import tqdm
+from scipy.io import loadmat
+import matplotlib.pyplot as plt
 from crazyslam.mapping import *
 
 
-if __name__ == '__main__':
-    from scipy.io import loadmat
-    import matplotlib.pyplot as plt
-    from tqdm import tqdm
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "--n_data_points",
+    default=4,
+    help="Number of data points to use for each scan",
+)
 
-    data = loadmat("crazyslam/data/mapping_data.mat")
+
+if __name__ == '__main__':
+    args = parser.parse_args()
+
+    data = loadmat("data/mapping_data.mat")
     states = np.array(data["pose"])
     ranges = np.array(data["ranges"])
     angles = np.array(data["scanAngles"])
     timestamp = np.array(data["t"])
 
-    selected_idx = np.linspace(0, len(angles)-1, 100, dtype="int32")
+    selected_idx = np.linspace(
+        0,
+        len(angles)-1,
+        100,
+        dtype="int32"
+    )
     angles = angles[selected_idx, :]
     ranges = ranges[selected_idx, :]
 
