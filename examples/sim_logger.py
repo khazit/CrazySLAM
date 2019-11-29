@@ -11,7 +11,7 @@ def logging_callback(timestamp, data, logconf):
     print("New data received", data)
     epoch_id = os.listdir("log")[0].split("_")[1]
     write_to_disk(
-        "log/flight_{}/flight_{}.log".format(epoch_id, epoch_id),  # TEMP
+        logconf.name,
         int(time.time()),
         data
     )
@@ -23,6 +23,7 @@ if __name__ == '__main__':
     cf = Crazyflie(rw_cache="cache")
     data_dir = "log"
     with SyncCrazyflie(get_address(), cf=cf) as scf:
-        init_log_conf(scf, logging_callback, data_dir)
+        init_log_conf(
+            scf, logging_callback, data_dir)
         while int(time.time()) < end:
             pass

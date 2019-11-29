@@ -34,11 +34,11 @@ def init_log_conf(scf, callback, data_dir):
     # State estimate (x, y, yaw)
     log_conf.add_variable('stateEstimate.x', 'float')
     log_conf.add_variable('stateEstimate.y', 'float')
-    log_conf.add_variable('controller.yaw', 'float')
+    log_conf.add_variable('stabilizer.yaw', 'float')
 
     scf.cf.log.add_config(log_conf)
     log_conf.data_received_cb.add_callback(callback)
-    start_file_manager(data_dir)
+    log_conf.name = start_file_manager(data_dir)
     log_conf.start()
 
 
@@ -50,6 +50,9 @@ def start_file_manager(data_dir):
 
     Args:
         data_dir: Path to the log files directory
+
+    Returns:
+        Path to the logging file
     """
     header = "timestamp,down,up,front,back,left,right,x,y,yaw\n"  # File header
     epoch = int(time.time())
@@ -67,6 +70,8 @@ def start_file_manager(data_dir):
     f = open(os.path.join(sub_dir, filename), "a")
     f.write(header)
     f.close()
+
+    return os.path.join(data_dir, "flight_{}".format(epoch), filename)
 
 
 def write_to_disk(file_path, timestamp, data):
