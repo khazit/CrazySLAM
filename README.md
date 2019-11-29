@@ -91,6 +91,23 @@ With this representation, the update algorithm becomes relatively simple:
   4. Simply update the corresponding update rule for each kind of cell
 
 #### Results
+The following simulations use data from the course on robotics by the University
+Of Toronto on [Coursera](https://www.coursera.org/learn/robotics-learning/).
+
+The data is a set of LIDAR scans from a moving robot with accurate state
+estimations. On the following figures, the environment is mapped using 1000,
+100, 10, then only 4 LIDAR points from each scan.
+This is to demonstrate the loss of information related to a smaller number
+of data points (we'll only use 4 TOF sensor on the Crazyflie).
+
+
+![Map_1000](https://raw.githubusercontent.com/khazit/CrazySLAM/57b6f0588b7f3accdb22a6fd151d00c11b9fa9cf/map_1000.png)
+
+![Map_100](https://raw.githubusercontent.com/khazit/CrazySLAM/57b6f0588b7f3accdb22a6fd151d00c11b9fa9cf/map_100.png)
+
+![Map_10](https://raw.githubusercontent.com/khazit/CrazySLAM/57b6f0588b7f3accdb22a6fd151d00c11b9fa9cf/map_10.png)
+
+![Map_4](https://raw.githubusercontent.com/khazit/CrazySLAM/57b6f0588b7f3accdb22a6fd151d00c11b9fa9cf/map_4.png)
 
 ### Localization
 
