@@ -2,6 +2,7 @@ import argparse
 from tqdm import tqdm
 from scipy.io import loadmat
 import matplotlib.pyplot as plt
+import matplotlib
 from crazyslam.mapping import *
 
 
@@ -25,7 +26,7 @@ if __name__ == '__main__':
     selected_idx = np.linspace(
         0,
         len(angles)-1,
-        100,
+        int(args.n_data_points),
         dtype="int32"
     )
     angles = angles[selected_idx, :]
@@ -44,6 +45,9 @@ if __name__ == '__main__':
             params
         )
 
+    matplotlib.rc('xtick', labelsize=5)
+    matplotlib.rc('ytick', labelsize=5)
     plt.figure()
     plt.imshow(occupancy_grid, cmap="gray")
+    plt.title("{} data points at each scan".format(args.n_data_points))
     plt.show()
