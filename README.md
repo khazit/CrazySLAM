@@ -70,9 +70,10 @@ over the probability of the event not happening. Because of the characteristics
 of the log function, the computation for map updates then becomes additions of
 the log odds.
 
-The update rules are:
-  * Occupied cell : <img src="https://latex.codecogs.com/png.latex?\Large&space;logodd_(cell) = logodd_(cell) + logodd_(occupied)"/>
-  * Free cell : <img src="https://latex.codecogs.com/png.latex?\Large&space;logodd_(cell) = logodd_(cell) - logodd_(free)"/>
+The update rules for a cell in a 2D grid map are :
+  * Occupied cell : `grid[i, j] += LOG_ODD_OCC`
+
+  * Free cell : `grid[i, j] -= LOG_ODD_FREE`
 
 The values of the log odds (occupied and free) will be fixed parameters of our
 model. We'll clip the log odds values to a minimum and maximum values (which
