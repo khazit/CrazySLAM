@@ -104,7 +104,7 @@ def update_particle_weights(
         particles: Set of state estimates and their corresponding weight
         correlation_matrix: LIDAR/MAP correlation matrix for weight updates
         grid_map: Occupancy grid map
-        map_params: grid map parameters dictionary
+        map_params: Grid map parameters dictionary
         ranges: Set on range inputs from sensor
         angles: Scan angles
 
@@ -165,14 +165,14 @@ def get_state_estimate(
     """Compute a state estimate using a particle filter
 
     Args:
-        particles:
+        particles: Set of state estimates and their corresponding weight
         system_noise_variance:
-        correlation_matrix:
-        grid_map:
-        map_params:
-        ranges:
-        angles:
-        resample_threshold:
+        correlation_matrix: LIDAR/MAP correlation matrix for weight updates
+        grid_map: Occupancy grid map
+        map_params: Grid map parameters dictionary
+        ranges: Set on range inputs from sensor
+        angles: Scan angles
+        resample_threshold: Threshold for resampling
 
     Returns:
         State vector representing the new state estimate.
