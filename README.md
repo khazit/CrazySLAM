@@ -44,8 +44,9 @@ This is what a SLAM algorithm generally looks like:
   3. Correct the position estimate given sensors observations at **t** and the
   map at **t-1**
 
-In others words, the intuition behind this class of algorithms is : **What motion
-best explains the difference between sensors observations at t-1 and t ?**
+In others words, the intuition behind this class of algorithms is : **What
+motion best explains the difference between sensors observations at t-1 and t
+given what is known about the environment ?**
 
 To implement this method on the Crazyflie: We'll use the Kalman filter state
 estimate (for step 2) which is computed by the drone's firmware. It uses sensor
@@ -75,21 +76,22 @@ The update rules for a cell in a 2D grid map are :
 
   * Free cell : `grid[i, j] -= LOG_ODD_FREE`
 
-The values of the log odds (occupied and free) will be fixed parameters of our
-model. We'll clip the log odds values to a minimum and maximum values (which
-will also be parameters) as it's never good to be too sure about a cell being
-occupied or free.
+The values of the log odds (`LOG_ODD_FREE` and `LOG_ODD_OCC`) will be fixed
+parameters of our model. We'll clip the log odds values to minimum and
+maximum values (`LOG_ODD_MIN` and `LOG_ODD_MAX` which will also be parameters)
+as it's never good to be too sure about a cell being occupied or free.
 
 With this representation, the update algorithm becomes relatively simple:
   1. At each timestamp, use the position estimate and the range observations to
   find the target (point where the range is measured).
-  2. Compute the index coordinates of those targets in the map. Those are the
+  2. Compute the index coordinates of those targets in the map. These are the
   occupied cells since the ultrasound beam was reflected on them.
   3. Compute the index coordinates of all the cells in the path of the sensor
   "beam" using the Bresenham line algorithm. If the ultrasound beam was
   reflected on the targets, it means that it traveled between the target and
-  the vehicle. Which is only possible if the path is unoccupied.
-  4. Simply update the corresponding update rule for each kind of cell
+  the vehicle. Which is only possible if the path is unoccupied (i.e. cells
+  along this path are free).
+  4. Apply the corresponding update rule for each kind of cell
 
 #### Results
 The following simulations use data from the course on robotics by the University
@@ -102,13 +104,7 @@ This is to demonstrate the loss of information related to a smaller number
 of data points (we'll only use 4 TOF sensor on the Crazyflie).
 
 
-![Map_1000](https://raw.githubusercontent.com/khazit/CrazySLAM/57b6f0588b7f3accdb22a6fd151d00c11b9fa9cf/map_1000.png)
-
-![Map_100](https://raw.githubusercontent.com/khazit/CrazySLAM/57b6f0588b7f3accdb22a6fd151d00c11b9fa9cf/map_100.png)
-
-![Map_10](https://raw.githubusercontent.com/khazit/CrazySLAM/57b6f0588b7f3accdb22a6fd151d00c11b9fa9cf/map_10.png)
-
-![Map_4](https://raw.githubusercontent.com/khazit/CrazySLAM/57b6f0588b7f3accdb22a6fd151d00c11b9fa9cf/map_4.png)
+![Maps](https://raw.githubusercontent.com/khazit/CrazySLAM/57b6f0588b7f3accdb22a6fd151d00c11b9fa9cf/map_1000.png)
 
 ### Localization
 
