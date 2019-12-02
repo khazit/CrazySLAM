@@ -149,7 +149,22 @@ The following simulations also use the
 it don't contain any IMU/odometry readings for the motion model update, we'll
 just use random walk.
 
+On the next figures, the state estimates are made using a Particle Filter with
+a fixed number of particles but different numbers of data points on each scan.
+
+![Localization_v_n_data_points]()
+
+On the next figures, the state estimates are made using a Particle Filter with
+a fixed number of data points on each scan but a variable number of particles
+
+![Localization_v_n_particles]()
+
 #### Performance
+The previous simulations gives us the following performances :
+
+![Performance_localization]()
+
+### Putting it all together : SLAM
 
 ## Install
 
