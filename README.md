@@ -146,7 +146,7 @@ lower than a fixed threshold.
 #### Results
 The following simulations also use the
 [Coursera's](https://www.coursera.org/learn/robotics-learning/) data. Because
-it don't contain any IMU/odometry readings for the motion model update, we'll
+it don't contain any IMU or odometry readings for the motion model update, we'll
 just use random walk.
 
 On the next figures, the state estimates are made using a fixed number of
@@ -190,7 +190,7 @@ The previous simulations gives us the following performances :
 By running these experiments, we see that the number of data points is not that
 important performance-wise. The real issue is the number of particles, and it
 comes from the fact that our implementation is not vectorized : we iterate over
-the particles using a `for` loop which is not efficient in Python. 
+the particles using a `for` loop which is not efficient in Python.
 
 ### Putting it all together : SLAM
 
