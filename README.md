@@ -149,7 +149,50 @@ The following simulations also use the
 it don't contain any IMU/odometry readings for the motion model update, we'll
 just use random walk.
 
+On the next figures, the state estimates are made using a fixed number of
+data points on each scan but a variable number of particles
+
+![Localization_v_n_data_points](https://raw.githubusercontent.com/khazit/CrazySLAM/2a9107ca58c63c73edd446902cfbf0c2e81f0bdb/localization_v_n_data_points.png)
+
+With a small number of particles, the algorithm seems to get lost along the way.
+The fist half positions are accurate but then the error grows exponentially.
+The downside of using random walk is that it involves a lot of luck.
+This will not be a problem for our implementation as we'll use the state estimate
+given by the onboard Kalman Filter algorithm.
+
+With a big enough number of particles, the error is nearly non existent.
+
+On the next figures, the state estimates are now made using
+a fixed number of particles but different numbers of data points on each scan.
+
+![Localization_v_n_particles](https://raw.githubusercontent.com/khazit/CrazySLAM/2a9107ca58c63c73edd446902cfbf0c2e81f0bdb/localization_v_n_particles.png)
+
+With just 4 data points on each scan (what is available on the Crazyflie), the
+algorithm performs badly and don't seem to find the correct path with 500 particles
+The experiments showed that it is not the case with a bigger number of particles
+(+1500), but this poses another issue : performance.
+
 #### Performance
+The previous simulations gives us the following performances :
+
+|  Number of data points on each scan | Number of particles | Update frequency |
+|-------------------------------------|---------------------|------------------|
+| 100                                 | **100**             | 80 Hz            |
+| 100                                 | **500**             | 16 Hz            |
+| 100                                 | **1000**            |  8 Hz            |
+
+|  Number of data points on each scan | Number of particles | Update frequency |
+|-------------------------------------|---------------------|------------------|
+| **4**                               | 500                 | 17 Hz            |
+| **100**                             | 500                 | 16 Hz            |
+| **1000**                            | 500                 | 11 Hz            |
+
+By running these experiments, we see that the number of data points is not that
+important performance-wise. The real issue is the number of particles, and it
+comes from the fact that our implementation is not vectorized : we iterate over
+the particles using a `for` loop which is not efficient in Python. 
+
+### Putting it all together : SLAM
 
 ## Install
 
