@@ -19,6 +19,25 @@ parser.add_argument(
 )
 
 
+def motion_model_update(states, sensor_input=None):
+    """Update the state estimate of the particles
+
+    Args:
+        states: States of the particles @ t, ie. (x, y, yaw)
+        sensor_input: NOT DEFINED YET
+
+    Returns:
+        States of the particles @ t+1
+    """
+    assert states.shape[0] == 3, "State vector error : Wrong shape"
+    n_particles = states.shape[1]
+    return states + np.random.normal(
+        loc=0,
+        scale=0.02,
+        size=3*n_particles
+    ).reshape(3, n_particles)
+
+
 if __name__ == '__main__':
     args = parser.parse_args()
 
@@ -51,6 +70,7 @@ if __name__ == '__main__':
 
     # Main loop
     for t in tqdm(range(count)):
+        particles[:-1, :] = motion_model_update(particles[:-1, :])
         pose[:, t], particles = get_state_estimate(
             particles,
             system_noise_variance,

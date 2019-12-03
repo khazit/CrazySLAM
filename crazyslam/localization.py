@@ -27,25 +27,6 @@ def init_random_particles(n):
     return random_particles
 
 
-def motion_model_update(states, sensor_input=None):
-    """Update the state estimate of the particles
-
-    Args:
-        states: States of the particles @ t, ie. (x, y, yaw)
-        sensor_input: NOT DEFINED YET
-
-    Returns:
-        States of the particles @ t+1
-    """
-    assert states.shape[0] == 3, "State vector error : Wrong shape"
-    n_particles = states.shape[1]
-    return states + np.random.normal(
-        loc=0,
-        scale=0.02,
-        size=3*n_particles
-    ).reshape(3, n_particles)
-
-
 def add_random_noise(states, system_noise_variance):
     """Add random noise to the particles given the system noise variance
 
@@ -180,7 +161,6 @@ def get_state_estimate(
 
     """
     # Propagate the particles
-    particles[:-1, :] = motion_model_update(particles[:-1, :])
     particles[:-1, :] = add_random_noise(
         particles[:-1, :],
         system_noise_variance
