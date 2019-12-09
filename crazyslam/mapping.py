@@ -77,7 +77,7 @@ def discretize(position, params):
         np.floor((position[0]) * params["resolution"]) + params["origin"][0],
         np.floor((position[1]) * params["resolution"]) + params["origin"][1],
     )).astype(np.int16)
-    return np.clip(idx, a_max=params["resolution"]*params["size"], a_min=0)
+    return np.clip(idx, a_max=params["resolution"]*params["size"]-1, a_min=0)
 
 
 def target_cell(state, sensor_range, sensor_bearing):
