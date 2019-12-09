@@ -168,7 +168,8 @@ a fixed number of particles but different numbers of data points on each scan.
 ![Localization_v_n_particles](https://raw.githubusercontent.com/khazit/CrazySLAM/2a9107ca58c63c73edd446902cfbf0c2e81f0bdb/localization_v_n_particles.png)
 
 With just 4 data points on each scan (what is available on the Crazyflie), the
-algorithm performs badly and don't seem to find the correct path with 500 particles
+algorithm performs badly and don't seem to find the correct path with 500 particles.
+
 The experiments showed that it is not the case with a bigger number of particles
 (+1500), but this poses another issue : performance.
 
