@@ -194,7 +194,22 @@ comes from the fact that our implementation is not vectorized : we iterate over
 the particles using a `for` loop which is not efficient in Python.
 
 ### Putting it all together : SLAM
+Given the two previous modules, the SLAM algorithm is quite simple:
+  1. Update the grid map using the current state estimate
+  2. Propagate the particles using the motion model
+  3. Update the state estimate using the Particle Filter
+
+#### Results
+
 
 ## Install
+```
+git clone https://github.com/khazit/CrazySLAM.git
+cd CrazySLAM
+pip3 install -e .
+```
 
 ## Contributing guidelines
+  * Mapping module:
+  * Localization module:
+  * SLAM module:
