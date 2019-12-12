@@ -16,5 +16,6 @@ setup(
     classifiers=[
         "Operating System :: OS Independent",
     ],
+    install_requires=['numpy', 'scikit-learn', 'matplotlib'],
     python_requires='>=3.6',
 )
