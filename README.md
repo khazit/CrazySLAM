@@ -200,7 +200,29 @@ Given the two previous modules, the SLAM algorithm is quite simple:
   3. Update the state estimate using the Particle Filter
 
 #### Results
+The first set of figures shows the ground truth map on the left, the map with
+noisy state estimates in the middle and the one with the SLAM algorithm on the
+left.
+We see excellent results for the SLAM algorithm, even though the orientation is
+skewed anti-clockwise.
+![SLAM maps](https://raw.githubusercontent.com/khazit/CrazySLAM/b3ce2c6e96b8c13c6bbcc80840be98693c390b1a/slam_maps.png)
 
+The following figures shows the path plotted on the ground truth map.
+The path is correct but seems to be off on the lower side of the map.
+![SLAM localization](https://raw.githubusercontent.com/khazit/CrazySLAM/a74e35106b6a53622524bf83e9e0352da0d0053e/slam_localization.png)
+
+Finally, the error analysis (difference between the slam state vector and the
+ground truth) shows that globally the SLAM algorithm succeeds at correcting the
+state estimations :
+![SLAM error analysis](https://raw.githubusercontent.com/khazit/CrazySLAM/a74e35106b6a53622524bf83e9e0352da0d0053e/error_slam_noise.png)
+  * The yaw correction is perfect
+  * The x and y estimations may be a little bit off sometimes but the algorithm
+  always seems to converge to the correct state estimate.
+
+The biggest problem however is **performance**. The previous simulation ran with
+3000 particles and 1000 data points and took around an hour.
+With an update speed of only 1 Hz, it can't (for the moment) be used in
+real time.
 
 ## Install
 ```
@@ -211,5 +233,14 @@ pip3 install -e .
 
 ## Contributing guidelines
   * Mapping module:
+    * Use a field of view representation instead of a straight line for the
+    ultrasound path (see [Extending the Occupancy Grid Concept for
+    operators for example)Low-Cost Sensor-Based SLAM](https://www.sciencedirect.com/science/article/pii/S1474667016336035))
+    * Post processing on the map in between iterations (edge detection
+    operators ?)
   * Localization module:
-  * SLAM module:
+    * Vectorized implementation for update_particle_weights function
+    * Compute the correlation score using the occupied AND the free cells
+    * Implement dynamic noise (current implementation use fixed covariance
+    values for noise generation, whereas noise is proportional to the speed of
+    the vehicle)
