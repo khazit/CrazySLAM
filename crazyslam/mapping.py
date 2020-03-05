@@ -13,10 +13,12 @@ from skimage.draw import line as bresenham
 def init_params_dict(size, resolution, origin=None):
     """Initialize the parameters dictionary given a map size and resolution
 
+    If origin is None, sets it to be in the middle of the map
+
     Args:
         size: Size of the square map in meters
         resolution: Number of cells to subdivide 1 meter into
-        origin: Initial
+        origin: Cell that represents the origin
 
     Returns:
         Parameters dictionary:
@@ -31,8 +33,8 @@ def init_params_dict(size, resolution, origin=None):
     }
     if params["origin"] is None:  # if origin is not set
         params["origin"] = (
-            params["resolution"]*params["size"]//2,
-            params["resolution"]*params["size"]//2,
+            params["resolution"]*params["size"]//2 - 1,
+            params["resolution"]*params["size"]//2 - 1,
         )
     return params
 
@@ -74,8 +76,10 @@ def discretize(position, params):
     assert position.shape[0] == 2, \
         "Error: Position vector shape should be (2, n)"
     idx = np.vstack((
-        np.floor((position[0]) * params["resolution"]) + params["origin"][0],
-        np.floor((position[1]) * params["resolution"]) + params["origin"][1],
+        ((position[0]) * params["resolution"]).astype("int")
+        + params["origin"][0],
+        ((position[1]) * params["resolution"]).astype("int")
+        + params["origin"][1],
     )).astype(np.int16)
     return np.clip(idx, a_max=params["resolution"]*params["size"]-1, a_min=0)
 
