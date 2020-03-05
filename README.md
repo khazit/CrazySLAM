@@ -105,7 +105,8 @@ of data points (only 4 TOF sensor are used on the Crazyflie).
 
 #### Performance
 The implementation of this module is fully vectorized, which allow high
-frequency map updates.
+frequency map updates. The following frequencies were measured using an
+Intel Core i5 CPU, with 8 cores.
 
 | Number of data points in each scan | Update frequency |
 |------------------------------------|------------------|
