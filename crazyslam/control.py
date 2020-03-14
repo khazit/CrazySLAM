@@ -1,13 +1,5 @@
 import os
-import time
 from pynput import keyboard
-
-from crazyslam.utils import get_address
-
-import cflib.crtp
-from cflib.crazyflie import Crazyflie
-from cflib.crazyflie.syncCrazyflie import SyncCrazyflie
-from cflib.positioning.motion_commander import MotionCommander
 
 
 def get_key_capture():

@@ -10,7 +10,6 @@ PROBLEM: File name have to be hardcoded in callback function
 import os
 import time
 from cflib.crazyflie.log import LogConfig
-from cflib.crazyflie.syncCrazyflie import SyncCrazyflie
 
 
 def init_log_conf(scf, callback, data_dir):
@@ -67,9 +66,9 @@ def start_file_manager(data_dir):
 
     # Write header
     print("Log file :", filename)
-    f = open(os.path.join(sub_dir, filename), "a")
-    f.write(header)
-    f.close()
+    file = open(os.path.join(sub_dir, filename), "a")
+    file.write(header)
+    file.close()
 
     return os.path.join(data_dir, "flight_{}".format(epoch), filename)
 
@@ -80,11 +79,11 @@ def write_to_disk(file_path, timestamp, data):
 
     # Concatenate all fieds into one string
     data_point = str(timestamp)
-    for key, value in data.items():
+    for _, value in data.items():
         data_point += ",{}".format(value)
     data_point += "\n"
 
     # Write data
-    f = open(file_path, "a")
-    f.write(data_point)
-    f.close()
+    file = open(file_path, "a")
+    file.write(data_point)
+    file.close()
