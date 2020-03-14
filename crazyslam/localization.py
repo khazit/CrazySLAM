@@ -6,11 +6,11 @@ Crazyflie using a particle filter
 
 
 import numpy as np
-from crazyslam.mapping import target_cell, discretize, init_params_dict
+from crazyslam.mapping import target_cell, discretize
 
 
 def init_random_particles(n):
-    """Initialize a set of n random particles"""
+    """Initializes a set of n random particles"""
     random_states = np.zeros((3, n))
     random_states[2, :] = np.random.uniform(
         low=-5,
@@ -28,7 +28,7 @@ def init_random_particles(n):
 
 
 def add_random_noise(states, system_noise_variance):
-    """Add random noise to the particles given the system noise variance
+    """Adds random noise to the particles given the system noise variance
 
     Args:
         states: States of the particles after motion model update
@@ -43,30 +43,30 @@ def add_random_noise(states, system_noise_variance):
             mean=np.zeros(3),
             cov=system_noise_variance,
         )
+    states[2, :] = np.unwrap(states[2, :])
     return states
 
 
 def normalize_weights(weights):
-    """Normalize weights (Softmax) so that the sum of the weights equals 1"""
+    """Normalizes weights (Softmax) so that the sum of the weights equals 1"""
     # Max shift to avoid exploding exp values
     weights -= weights.max()
-    weights_sum = np.abs(weights).sum()
     normalized_weights = np.exp(weights)/sum(np.exp(weights))
-    assert np.abs(normalized_weights.sum()-1) <= 1e-5, \
+    assert np.isclose(np.sum(normalized_weights), 1), \
         "Sum of the weights is not equal to 1"
     return normalized_weights
 
 
 def get_correlation_score(grid_map, target_cells, correlation_matrix):
-    """Compute the correlation score of a single particle
+    """Computes the correlation score of a single particle
 
     Args:
         grid_map: Occupancy grid map
         target_cells:
-        correlation_matrix:
+        correlation_matrix: Matrix with the scores hits/misses
 
     Returns:
-        Score
+        Colleration score for a single particle
     """
     target_map = grid_map[target_cells[0, :], target_cells[1, :]] > 0
     hits = np.sum(target_map)
@@ -79,7 +79,7 @@ def update_particle_weights(
     grid_map, map_params,
     ranges, angles
 ):
-    """Update the particle weights
+    """Updates the particle weights
 
     Args:
         particles: Set of state estimates and their corresponding weight
@@ -126,7 +126,7 @@ def compute_effective_n_particles(weights):
 
 
 def resample(particles):
-    """Resample particles given their weights/probability"""
+    """Resamples particles given their weights/probability"""
     idx = np.random.choice(
         a=np.arange(0, particles.shape[1], 1),
         size=particles.shape[1],
@@ -143,7 +143,7 @@ def get_state_estimate(
     ranges, angles,
     resample_threshold
 ):
-    """Compute a state estimate using a particle filter
+    """Computes a state estimate using a particle filter
 
     Args:
         particles: Set of state estimates and their corresponding weight
