@@ -78,7 +78,7 @@ def test_get_state_estimate():
     ])
     ranges = np.array([2, 4])
     angles = np.array([0, np.pi / 2])
-    system_noise_variance = np.diag([0.2, 0.2, 0.2])
+    system_noise_variance = np.diag([1e-10, 1e-10, 1e-10])
 
     state_estimate = get_state_estimate(
         particles,
