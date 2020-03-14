@@ -49,7 +49,7 @@ class SLAM():
         self.correlation_matrix = correlation_matrix
         self.resampling_threshold = (n_particles * 10) // 100
         self.current_state = current_state
-        self.particles = particles = np.zeros((4, n_particles))
+        self.particles = np.zeros((4, n_particles))
         self.particles[:3, :] = current_state.reshape((3, 1)) \
             * np.ones((3, n_particles))
         self.particles[3, :] = (1/500) * np.ones((1, n_particles))
