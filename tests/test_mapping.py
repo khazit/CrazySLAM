@@ -17,10 +17,10 @@ def test_init_params_dict():
     ref = {
         "resolution": 10,
         "size": 30,
-        "origin": (149, 149),
+        "origin": (150, 150),
     }
     assert ref == init_params_dict(30, 10)
-    assert ref ==  init_params_dict(30, 10, (149, 149))
+    assert ref == init_params_dict(30, 10, (150, 150))
 
 def test_create_empty_map(params, empty_map):
     assert (empty_map == create_empty_map(params)).all()
@@ -33,9 +33,9 @@ def test_discretize(params):
         [-130, 140]
     ]).T
     ref = np.array([
-        [149, 149],
-        [249, 249],
-        [49, 249],
+        [150, 150],
+        [250, 250],
+        [50, 250],
         [0, 299],
     ]).T
     assert (discretize(pos, params) == ref).all()
@@ -58,13 +58,13 @@ def test_target_cell():
 def test_update_grid_map():
     params = init_params_dict(size=23, resolution=1)
     map = create_empty_map(params)
-    assert params["origin"] == (10, 10)
+    assert params["origin"] == (11, 11)
     state = np.array([0, 0, 0])
     ranges = np.array([1, 2, 3, 5])
     angles = np.array([0, np.pi / 2, np.pi, 3*np.pi / 2])
     map = update_grid_map(map, ranges, angles, state, params)
-    assert map[10, 10] < 0 # check if position is free
-    assert map[11, 10] > 0 # first target
-    assert map[10, 8]  > 0 and (map[10, 9:11] < 0).all() # second target + path
-    assert map[7, 10]  > 0 and (map[8:11, 10] < 0).all() # third target + path
-    assert map[10, 15] > 0 and (map[10, 11:15] < 0).all() # third target + path
+    assert map[11, 11] < 0 # check if position is free
+    assert map[12, 11] > 0 # first target
+    assert map[11, 9]  > 0 and (map[11, 10:12] < 0).all() # second target + path
+    assert map[8, 11]  > 0 and (map[9:12, 11] < 0).all() # third target + path
+    assert map[11, 16] > 0 and (map[11, 12:16] < 0).all() # third target + path

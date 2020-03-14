@@ -6,8 +6,8 @@ map using ultrasound sensors range inputs.
 
 
 import numpy as np
-from math import floor, cos, sin
 from skimage.draw import line as bresenham
+from math import floor
 
 
 def init_params_dict(size, resolution, origin=None):
@@ -33,8 +33,8 @@ def init_params_dict(size, resolution, origin=None):
     }
     if params["origin"] is None:  # if origin is not set
         params["origin"] = (
-            params["resolution"]*params["size"]//2 - 1,
-            params["resolution"]*params["size"]//2 - 1,
+            floor(params["resolution"]*params["size"] / 2),
+            floor(params["resolution"]*params["size"] / 2),
         )
     return params
 
