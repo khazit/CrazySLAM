@@ -229,6 +229,8 @@ pip install .
 
 ## Contributing guidelines
   * Mapping module:
+    * Vectorized implementation of the Bresenham line algorithm for multiple
+      targets
     * Use a field of view representation instead of a straight line for the
     ultrasound path (see [Extending the Occupancy Grid Concept for
     operators for example)Low-Cost Sensor-Based SLAM](https://www.sciencedirect.com/science/article/pii/S1474667016336035))
