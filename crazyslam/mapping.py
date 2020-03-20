@@ -75,7 +75,7 @@ def discretize(position, params):
     """
     assert position.shape[0] == 2, \
         "Error: Position vector shape should be (2, n)"
-    idx = np.vstack((
+    idx = np.stack((
         ((position[0]) * params["resolution"]).astype("int")
         + params["origin"][0],
         ((position[1]) * params["resolution"]).astype("int")
@@ -84,42 +84,38 @@ def discretize(position, params):
     return np.clip(idx, a_max=params["resolution"]*params["size"]-1, a_min=0)
 
 
-def target_cell(state, sensor_range, sensor_bearing):
-    """Find the (x, y) GLOBAL coordinates of the observed point
+def target_cell(states, sensor_range, sensor_bearing):
+    """Find the (x, y) GLOBAL coordinates of the observed point(s)
 
     NOTE: target point could be out of range (not in the map)
 
     Args:
-        state: (x, y, alpha) state of the vehicule in the GLOBAL frame
+        states (3 x n_particles): One or multiple states of the vehicle
+            in the GLOBAL frame
         sensor_range: Observed ranges
         sensor_bearing: Sensor headings
 
     Returns:
-        2D vector ((x, y), n) of GLOBAL coordinates
+        2D or 3D vector (2 x n_cells x n_particles) of GLOBAL coordinates
     """
     # If is sensor input is a vector, then use vectorization
-    if isinstance(sensor_range, np.ndarray):
-        sensor_range = sensor_range.reshape((-1, 1))
-        sensor_bearing = sensor_bearing.reshape((-1, 1))
-        res = np.concatenate((
-            (sensor_range * np.cos(state[2]+sensor_bearing)) + state[0],
-            (-sensor_range * np.sin(state[2]+sensor_bearing)) + state[1],
-        ), axis=1).T
-    else:
-        assert type(sensor_range) == type(sensor_bearing),\
-            "Range inputs and scan angles not the same type. {}-{}".format(
-                type(sensor_range),
-                type(sensor_bearing)
-            )
-        res = np.array([
-            (sensor_range * np.cos(state[2]+sensor_bearing)) + state[0],
-            (-sensor_range * np.sin(state[2]+sensor_bearing)) + state[1],
-        ])
-    assert res.shape[0] == 2, \
-        "Error: Incorrect shape returned. Should be (2, n), is {}".format(
-            res.shape
-        )
-    return res
+    if states.ndim == 2:
+        n_particles = states.shape[1]
+    elif states.ndim == 1:
+        n_particles = 1
+    n_target_cells = len(sensor_bearing)
+    sensor_range = sensor_range.reshape((-1, 1))
+    sensor_bearing = sensor_bearing.reshape((-1, 1))
+    states = states.reshape((3, -1))
+    x = (sensor_range * np.cos(states[2, :]+sensor_bearing)) + states[0, :]
+    x = x.reshape((1, n_target_cells, n_particles))
+    y = (-sensor_range * np.sin(states[2, :]+sensor_bearing)) + states[1, :]
+    y = y.reshape((1, n_target_cells, n_particles))
+    res = np.concatenate((
+        x,
+        y,
+    ), axis=0)
+    return res.squeeze()
 
 
 def bresenham_line(start, end):
@@ -135,7 +131,7 @@ def bresenham_line(start, end):
         List of (x, y) INDEX coordinates that form the straight lines
     """
     path = list()
-    for target in end.T:
+    for target in end.T:  # TODO: delete for loop
         tmp = bresenham(start[0], start[1], target[0], target[1])
         path += (list(zip(tmp[0], tmp[1]))[1:-1])  # start + end points removed
     return path
@@ -168,8 +164,8 @@ def update_grid_map(grid, ranges, angles, state, params):
     cells = bresenham_line(position.reshape(2), targets)
 
     # update log odds
-    grid[position[0, :], position[1, :]] -= LOG_ODD_FREE
+    grid[position[0], position[1]] -= LOG_ODD_FREE
     grid[tuple(np.array(cells).T)] -= LOG_ODD_FREE
-    grid[targets[0, :], targets[1, :]] += LOG_ODD_OCCU
+    grid[targets[0], targets[1]] += LOG_ODD_OCCU
 
     return np.clip(grid, a_max=LOG_ODD_MAX, a_min=LOG_ODD_MIN)

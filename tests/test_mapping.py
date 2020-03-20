@@ -55,6 +55,39 @@ def test_target_cell():
         targets,
     ).all()
 
+def test_target_cell_multi():
+    states = np.array([
+        [10, 10, 10],
+        [10, 10, 10],
+        [0, 0, 0],
+    ])
+    sensor_range = np.array([1, 2, 5, 10])
+    sensor_bearing = np.array([0, np.pi / 4, np.pi / 2, np.pi])
+    targets = np.array([
+        [
+            [11.0, 10.0],
+            [11.414213562373096, 8.585786437626904],
+            [10.0, 5.0],
+            [0.0, 9.999999999999998],
+        ],
+        [
+            [11.0, 10.0],
+            [11.414213562373096, 8.585786437626904],
+            [10.0, 5.0],
+            [0.0, 9.999999999999998],
+        ],
+        [
+            [11.0, 10.0],
+            [11.414213562373096, 8.585786437626904],
+            [10.0, 5.0],
+            [0.0, 9.999999999999998],
+        ],
+    ]).T
+    assert np.isclose(
+        target_cell(states, sensor_range, sensor_bearing),
+        targets,
+    ).all()
+
 def test_update_grid_map():
     params = init_params_dict(size=23, resolution=1)
     map = create_empty_map(params)
