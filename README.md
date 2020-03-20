@@ -179,20 +179,15 @@ The previous simulations gives us the following performances :
 
 |  Number of data points on each scan | Number of particles | Update frequency |
 |-------------------------------------|---------------------|------------------|
-| 100                                 | **100**             | 80 Hz            |
-| 100                                 | **500**             | 16 Hz            |
-| 100                                 | **1000**            |  8 Hz            |
+| 100                                 | **100**             | 740 Hz           |
+| 100                                 | **500**             | 180 Hz           |
+| 100                                 | **1000**            |  13 Hz           |
 
 |  Number of data points on each scan | Number of particles | Update frequency |
 |-------------------------------------|---------------------|------------------|
-| **4**                               | 500                 | 17 Hz            |
-| **100**                             | 500                 | 16 Hz            |
-| **1000**                            | 500                 | 11 Hz            |
-
-By running these experiments, we see that the number of data points is not that
-important performance-wise. The real issue is the number of particles, and it
-comes from the fact that our implementation is not vectorized : we iterate over
-the particles using a `for` loop which is not efficient in Python.
+| **4**                               | 500                 | 360 Hz           |
+| **100**                             | 500                 | 180 Hz           |
+| **1000**                            | 500                 |  25 Hz           |
 
 ### Putting it all together : SLAM
 Given the two previous modules, the SLAM algorithm is quite simple:
@@ -222,14 +217,14 @@ state estimations :
 
 The biggest problem however is **performance**. The previous simulation ran with
 3000 particles and 1000 data points and took around an hour.
-With an update speed of only 1 Hz, it can't (for the moment) be used in
+With an update speed of only 3 Hz, it can't (for the moment) be used in
 real time.
 
 ## Install
 ```
 git clone https://github.com/khazit/CrazySLAM.git
 cd CrazySLAM
-pip3 install -e .
+pip install .
 ```
 
 ## Contributing guidelines
@@ -240,7 +235,6 @@ pip3 install -e .
     * Post processing on the map in between iterations (edge detection
     operators ?)
   * Localization module:
-    * Vectorized implementation for update_particle_weights function
     * Compute the correlation score using the occupied AND the free cells
     * Implement dynamic noise (current implementation use fixed covariance
     values for noise generation, whereas noise is proportional to the speed of
