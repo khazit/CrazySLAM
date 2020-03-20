@@ -38,11 +38,11 @@ def add_random_noise(states, system_noise_variance):
         States of the particles
     """
     assert states.shape[0] == 3, "State vector error : Wrong shape"
-    for i in range(states.shape[1]):
-        states[:, i] += np.random.multivariate_normal(
-            mean=np.zeros(3),
-            cov=system_noise_variance,
-        )
+    states += np.random.multivariate_normal(
+        mean=np.zeros(3),
+        cov=system_noise_variance,
+        size=states.shape[1]
+    ).T
     states[2, :] = np.unwrap(states[2, :])
     return states
 
@@ -52,8 +52,6 @@ def normalize_weights(weights):
     # Max shift to avoid exploding exp values
     weights -= weights.max()
     normalized_weights = np.exp(weights)/sum(np.exp(weights))
-    assert np.isclose(np.sum(normalized_weights), 1), \
-        "Sum of the weights is not equal to 1"
     return normalized_weights
 
 
@@ -62,15 +60,26 @@ def get_correlation_score(grid_map, target_cells, correlation_matrix):
 
     Args:
         grid_map: Occupancy grid map
-        target_cells:
+        target_cells: 2D or 3D vector (2 x n_cells x n_particles)
+            of index coordinates
         correlation_matrix: Matrix with the scores hits/misses
 
     Returns:
         Colleration score for a single particle
     """
-    target_map = grid_map[target_cells[0, :], target_cells[1, :]] > 0
-    hits = np.sum(target_map)
-    misses = target_map.size - hits
+    if target_cells.ndim == 3:
+        n_particles = target_cells.shape[2]
+        n_cells = target_cells.shape[1]
+        target_maps = np.vstack(
+            [grid_map[target_cells[0, :, i], target_cells[1, :, i]] > 0
+             for i in range(n_particles)]  # TODO: delete for loop
+        )
+        hits = np.sum(target_maps, axis=1)
+        misses = n_cells * np.ones_like(hits) - hits
+    elif target_cells.ndim == 2:
+        target_map = grid_map[target_cells[0, :], target_cells[1, :]] > 0
+        hits = np.sum(target_map)
+        misses = target_map.size - hits
     return hits*correlation_matrix[1, 1] + misses*correlation_matrix[0, 1]
 
 
@@ -92,17 +101,15 @@ def update_particle_weights(
     Returns:
         Set of particles with updated weights
     """
-    # For each particle
-    for particle in particles.T:
-        # Find target cells
-        target_cells = target_cell(particle[:3], ranges, angles)
-        target_cells = discretize(target_cells, map_params)
-        # Apply the correlation score to the particle
-        particle[-1] = get_correlation_score(
-            grid_map,
-            target_cells,
-            correlation_matrix
-        )
+    # Find target cells
+    target_cells = target_cell(particles[:3, :], ranges, angles)
+    target_cells = discretize(target_cells, map_params)
+    # Compute correlation scores
+    particles[-1, :] = get_correlation_score(
+        grid_map,
+        target_cells,
+        correlation_matrix,
+    )
     # Normalize all weights
     particles[-1, :] = normalize_weights(particles[-1, :])
     return particles
